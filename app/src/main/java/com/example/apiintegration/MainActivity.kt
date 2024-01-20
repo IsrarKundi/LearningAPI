@@ -4,9 +4,11 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Card
 import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
@@ -24,8 +27,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.apiintegration.ui.theme.ApiIntegrationTheme
 import retrofit2.Call
 import retrofit2.Callback
@@ -52,17 +58,23 @@ class MainActivity : ComponentActivity() {
                 var responseBody = response.body()
                 val productList = responseBody?.products
 
-                val collectDataInSB = StringBuilder()
-
-                if (productList != null) {
-                    for(myData in productList){
-                        collectDataInSB.append(myData.title + "  ")
+                productList?.let {
+                    setContent {
+                        MainScreen(products = it)
                     }
-                    }
-
-                setContent {
-                    MainScreen(collectDataInSB.toString())
                 }
+
+//                val collectDataInSB = StringBuilder()
+//
+//                if (productList != null) {
+//                    for(myData in productList){
+//                        collectDataInSB.append(myData.title + "  ")
+//                    }
+//                    }
+//
+//                setContent {
+//                    MainScreen(collectDataInSB.toString())
+//                }
 
                 }
 
@@ -78,56 +90,56 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(title: String) {
-//    CardList()
-
-    Column(modifier = Modifier.fillMaxSize()){
-        Text(text = title)
-    }
+fun MainScreen(products: List<Product>) {
+    // Assuming you have a List<Product> from your API response
+    ProductList(products = products)
 }
-
+//
 
 @Composable
-fun CardList() {
-    val cardDataList = listOf(
-        CardData("Title 1", "Description 1"),
-        CardData("Title 2", "Description 2"),
-        // Add more card data as needed
-    )
-
-    LazyColumn(
+fun ProductCard(product: Product) {
+    Card(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(16.dp)
     ) {
-        items(cardDataList) { cardData ->
-            CardItem(cardData)
-            Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+
+
+            Image(
+                painter = rememberImagePainter(
+                    data = product.thumbnail,
+                    onLoading = { painterResource(androidx.core.R.drawable.notification_bg) }, // Use a placeholder
+                    onError = { painterResource(androidx.core.R.drawable.ic_call_decline) } // Handle errors
+                ),
+                contentDescription = product.title, // Accessibility
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Text(text = product.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Price: $${product.price}", fontSize = 12.sp)
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(text = "Rating: ${product.rating}", fontSize = 10.sp)
         }
     }
 }
-
 @Composable
-fun CardItem(cardData: CardData) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(16.dp)
-    ) {
-        Column {
-            Text(
-                text = cardData.title,
-                style = typography.bodyLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = cardData.description,
-                style = typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface
-            )
+fun ProductList(products: List<Product>) {
+    LazyColumn {
+        items(products) { product ->
+            ProductCard(product = product)
         }
     }
 }
