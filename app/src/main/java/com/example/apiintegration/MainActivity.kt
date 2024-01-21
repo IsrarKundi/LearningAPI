@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
@@ -33,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.apiintegration.ui.theme.ApiIntegrationTheme
+import com.squareup.picasso.Picasso
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -111,28 +113,30 @@ fun ProductCard(product: Product) {
         ) {
 
 
-            Image(
-                painter = rememberImagePainter(
-                    data = product.thumbnail,
-                    onLoading = { painterResource(androidx.core.R.drawable.notification_bg) }, // Use a placeholder
-                    onError = { painterResource(androidx.core.R.drawable.ic_call_decline) } // Handle errors
-                ),
-                contentDescription = product.title, // Accessibility
-                modifier = Modifier.fillMaxWidth()
-            )
+//            Image(painter = product.thumbnail, contentDescription = "product Image")
+            Column(
+                modifier = Modifier
+                    .width(70.dp)
+                    .padding(16.dp)
+            ) {
+                Picasso.get().load(product.thumbnail)
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(text = product.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Price: $${product.price}", fontSize = 12.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(text = "Rating: ${product.rating}", fontSize = 10.sp)
+            }
+
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(text = product.title, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Price: $${product.price}", fontSize = 12.sp)
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(text = "Rating: ${product.rating}", fontSize = 10.sp)
-        }
+
     }
 }
 @Composable
